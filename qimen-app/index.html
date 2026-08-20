@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奇門遁甲．擲盤占卜</title>
+<style>
+  :root{
+    --bg: #07070a;
+    --surface: #131319;
+    --surface-2: #1a1a22;
+    --ink: #ece5d3;
+    --ink-dim: #8a8577;
+    --ink-faint: #4d4a42;
+    --gold: #b7924a;
+    --gold-hi: #e6c878;
+    --gold-dim: #4a3d1f;
+    --red: #b23b2e;
+    --orange: #e0642a;
+    --cyan: #6fadbe;
+    --line: #262631;
+    --halo-color: #b7924a;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -6%, rgba(183,146,74,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 1200px 800px at 50% 110%, #101018 0%, var(--bg) 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 56px 22px 90px;
+  }
+
+  /* ---------- Login bar ---------- */
+  .login-bar{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    font-size: 12.5px;
+    color: var(--ink-dim);
+  }
+  .login-bar .user-info{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+  }
+  .login-bar img.avatar{
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--gold-dim);
+  }
+  .btn-line{
+    display:inline-flex;
+    align-items:center;
+    gap: 7px;
+    background: #06C755;
+    color: #fff;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: filter 0.15s ease;
+  }
+  .btn-line:hover{ filter: brightness(1.08); }
+  .btn-logout{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.05em;
+  }
+  .btn-logout:hover{ border-color: var(--gold-dim); color: var(--gold); }
+
+  .btn-topup{
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.05em;
+  }
+  .btn-topup:hover{ background: rgba(183,146,74,0.1); }
+
+  .topup-panel{
+    max-width: 420px;
+    margin: -14px auto 30px;
+    display: none;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .topup-panel.show{ display:flex; }
+  .topup-panel a{
+    display:block;
+    text-decoration:none;
+    background: var(--surface);
+    border: 1px solid var(--gold-dim);
+    border-radius: 10px;
+    padding: 12px 18px;
+    text-align:center;
+    color: var(--ink);
+    font-size: 12.5px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .topup-panel a:hover{ border-color: var(--gold); background: rgba(183,146,74,0.08); }
+  .topup-panel a .pts{
+    display:block;
+    font-family: "Noto Serif TC", serif;
+    font-size: 18px;
+    color: var(--gold-hi);
+    margin-bottom: 4px;
+  }
+  .topup-panel a .price{ color: var(--ink-dim); font-size: 11px; }
+
+  /* ---------- Header ---------- */
+  header{ text-align:center; margin-bottom: 40px; }
+  .eyebrow{
+    letter-spacing: 0.55em;
+    font-size: 10.5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin: 0 0 16px;
+    opacity: 0.85;
+  }
+  .rule{
+    width: 40px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto 18px;
+  }
+  h1{
+    font-family: "Noto Serif TC", "Songti TC", serif;
+    font-weight: 600;
+    font-size: clamp(26px, 6vw, 36px);
+    margin: 0 0 10px;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+  }
+  h1 em{
+    font-style: normal;
+    color: var(--gold-hi);
+  }
+  .sub{
+    color: var(--ink-dim);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+  }
+
+  /* ---------- Question ---------- */
+  .question-box{
+    margin: 34px auto 34px;
+    max-width: 480px;
+    position: relative;
+  }
+  .question-box input{
+    width:100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 4px 12px;
+    color: var(--ink);
+    font-size: 14.5px;
+    font-family: "Noto Serif TC", serif;
+    letter-spacing: 0.05em;
+    text-align: center;
+    transition: border-color 0.2s ease;
+  }
+  .question-box input::placeholder{ color: var(--ink-faint); }
+  .question-box input:focus{ outline: none; border-color: var(--gold-dim); }
+
+  /* ---------- Mode toggle ---------- */
+  .mode-toggle{
+    display:flex;
+    justify-content:center;
+    gap: 0;
+    margin-bottom: 28px;
+  }
+  .mode-toggle button{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    padding: 9px 22px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .mode-toggle button:first-child{ border-radius: 999px 0 0 999px; border-right:none; }
+  .mode-toggle button:last-child{ border-radius: 0 999px 999px 0; }
+  .mode-toggle button.active{
+    color: var(--gold-hi);
+    border-color: var(--gold-dim);
+    background: rgba(183,146,74,0.08);
+  }
+
+  /* ---------- Dice ---------- */
+  .dice-row{
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+  .die{
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 54px;
+    height: 64px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+    display:flex; align-items:center; justify-content:center;
+    font-size: clamp(16px, 5.5vw, 22px);
+    font-weight: 500;
+    font-family: "Noto Serif TC", serif;
+    color: var(--gold);
+    position: relative;
+    box-shadow: inset 0 0 14px rgba(183,146,74,0.06);
+  }
+  .die::before{
+    content:'';
+    position:absolute; inset: 4px;
+    border: 1px solid rgba(183,146,74,0.18);
+    border-radius: 9px;
+    pointer-events: none;
+  }
+  .die::after{
+    content: attr(data-label);
+    position:absolute;
+    bottom: -19px;
+    font-size: 9px;
+    color: var(--ink-faint);
+    letter-spacing: 0.15em;
+  }
+  .die.default-char{ color: var(--ink-faint); font-size: 18px; }
+  .die.rolling{ animation: shake 0.08s infinite; color: var(--ink-dim); }
+  @keyframes shake{
+    0%{ transform: translateY(0) rotate(0deg); }
+    50%{ transform: translateY(-2px) rotate(-2deg); }
+    100%{ transform: translateY(1px) rotate(2deg); }
+  }
+
+  .die-input{
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 54px;
+    height: 64px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+    color: var(--gold-hi);
+    font-size: clamp(16px, 5.5vw, 24px);
+    font-family: "Noto Serif TC", serif;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .die-input::-webkit-outer-spin-button,
+  .die-input::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0; }
+  .die-input:focus{ outline:none; border-color: var(--gold); }
+
+  /* ---------- Buttons ---------- */
+  .action-wrap{ text-align:center; margin-bottom: 8px; }
+  .btn-gold{
+    position: relative;
+    background: linear-gradient(180deg, var(--gold-hi), var(--gold) 70%);
+    color: #14120a;
+    border: none;
+    width: 100%;
+    max-width: 374px;
+    padding: 15px 0;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    cursor: pointer;
+    font-family: "Noto Serif TC", serif;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 18px rgba(183,146,74,0.25);
+  }
+  .btn-gold:hover{ transform: translateY(-1px); box-shadow: 0 6px 22px rgba(183,146,74,0.35); }
+  .btn-gold:active{ transform: translateY(0); }
+  .btn-gold:disabled{ opacity: 0.45; cursor: default; transform:none; box-shadow:none; }
+
+  .reroll-note{
+    text-align:center;
+    font-size: 11.5px;
+    color: var(--red);
+    min-height: 18px;
+    margin: 12px 0 0;
+    letter-spacing: 0.08em;
+  }
+
+  /* ---------- Result ---------- */
+  .result-area{ margin-top: 58px; display:none; }
+  .result-area.show{ display:block; }
+
+  .palace-gua-top{
+    text-align:center;
+    font-size: 34px;
+    margin-bottom: 14px;
+    color: var(--halo-color);
+    text-shadow: 0 0 18px var(--halo-color);
+    transition: color 0.3s ease;
+  }
+
+  .palace-frame-outer{
+    width: 240px;
+    height: 240px;
+    margin: 0 auto;
+    padding: 3px;
+    border-radius: 4px;
+    box-shadow: 0 0 36px 6px var(--halo-color);
+    transition: box-shadow 0.3s ease;
+  }
+  .palace-frame{
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--halo-color);
+    box-shadow: inset 0 0 30px var(--halo-color);
+    position: relative;
+    display: flex;
+    align-items: center;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .palace-grid{
+    width: 100%;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 16px;
+    position: relative;
+  }
+  .cell{
+    font-family: "Noto Serif TC", serif;
+    font-size: 21px;
+    text-align:center;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+  .cell.shen{ grid-column: 1 / 3; font-size: 26px; color: var(--ink); letter-spacing: 0.3em; }
+  .cell .val{ position:relative; display:inline-block; }
+  .cell .empty-circle{
+    display:inline-block;
+    width: 30px; height: 30px;
+    border: 2.5px solid currentColor;
+    border-radius: 50%;
+  }
+  .cell.red .val{ color: var(--red); }
+  .cell.orange .val{ color: var(--orange); }
+  .cell.cyan .val{ color: var(--cyan); }
+
+  .palace-name-bottom{
+    text-align:center;
+    margin-top: 16px;
+    font-family: "Noto Serif TC", serif;
+    font-size: 15px;
+    letter-spacing: 0.5em;
+    padding-left: 0.5em;
+    color: var(--halo-color);
+    text-shadow: 0 0 14px var(--halo-color);
+    transition: color 0.3s ease;
+  }
+
+  .pan-summary{
+    max-width: 460px;
+    margin: 26px auto 0;
+    text-align:center;
+    font-size: 13px;
+    line-height: 2;
+    color: var(--ink-dim);
+    letter-spacing: 0.06em;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+  .pan-summary .label{ color: var(--ink-faint); font-size: 10.5px; letter-spacing: 0.3em; margin-bottom: 6px; display:block; }
+  .pan-summary .line{ color: var(--ink); }
+
+  .harm-tags{
+    margin: 18px auto 0;
+    max-width: 280px;
+    display:flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    justify-content: center;
+  }
+  .tag{
+    font-size: 10.5px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+  }
+  .tag.red{ color: var(--red); border-color: rgba(178,59,46,0.45); }
+  .tag.orange{ color: var(--orange); border-color: rgba(201,138,59,0.45); }
+  .tag.cyan{ color: var(--cyan); border-color: rgba(111,173,190,0.45); }
+
+  .interpret-btn-wrap{ text-align:center; margin-top: 34px; }
+  .interpret-btn{
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    padding: 12px 30px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+  .interpret-btn:hover{ background: rgba(183,146,74,0.08); border-color: var(--gold); }
+
+  .interpret-box{
+    margin: 22px auto 0;
+    max-width: 520px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 22px 24px;
+    font-size: 13.5px;
+    line-height: 1.95;
+    color: var(--ink-dim);
+    display:none;
+    white-space: pre-wrap;
+  }
+  .interpret-box.show{ display:block; }
+
+  footer{
+    text-align:center;
+    margin-top: 70px;
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    letter-spacing: 0.25em;
+  }
+
+  .legend{
+    max-width: 520px;
+    margin: 46px auto 0;
+    font-size: 11px;
+    color: var(--ink-faint);
+    display:flex;
+    justify-content:center;
+    gap: 20px;
+    flex-wrap: wrap;
+    letter-spacing: 0.03em;
+  }
+  .legend span{ display:inline-flex; align-items:center; gap: 6px; }
+  .swatch{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="login-bar" id="loginBar">
+    <button class="btn-line" id="lineLoginBtn">
+      使用 LINE 登入
+    </button>
+  </div>
+
+  <div class="topup-panel" id="topupPanel">
+    <a href="/api/create-order?package=100"><span class="pts">100 點</span><span class="price">NT$100</span></a>
+    <a href="/api/create-order?package=300"><span class="pts">300 點</span><span class="price">NT$270</span></a>
+    <a href="/api/create-order?package=1000"><span class="pts">1000 點</span><span class="price">NT$800</span></a>
+  </div>
+
+  <header>
+    <div class="eyebrow">SIX DIGIT DIVINATION</div>
+    <div class="rule"></div>
+    <h1>奇門遁甲 <em>擲盤占卜</em></h1>
+    <div class="sub">誠心默問，起一宮盤象</div>
+  </header>
+
+  <div class="question-box">
+    <input id="questionInput" type="text" placeholder="想問什麼事？（例：這件事適合現在進行嗎）" />
+  </div>
+
+  <div class="mode-toggle">
+    <button id="modeRollBtn" class="active">擲骰起盤</button>
+    <button id="modeManualBtn">手動輸入</button>
+  </div>
+
+  <div class="dice-row" id="diceRow"></div>
+
+  <div class="action-wrap">
+    <button class="btn-gold" id="actionBtn">擲　骰</button>
+  </div>
+  <div class="reroll-note" id="rerollNote"></div>
+
+  <div class="result-area" id="resultArea">
+    <div class="palace-gua-top" id="palaceGuaTop"></div>
+
+    <div class="palace-frame-outer" id="palaceFrameOuter">
+      <div class="palace-frame" id="palaceFrame">
+        <div class="palace-grid" id="palaceGrid"></div>
+      </div>
+    </div>
+
+    <div class="palace-name-bottom" id="palaceName"></div>
+
+    <div class="harm-tags" id="harmTags"></div>
+
+    <div class="pan-summary" id="panSummary"></div>
+
+    <div class="interpret-btn-wrap">
+      <button class="interpret-btn" id="interpretBtn">AI 解盤（每次 10 點／每 30 天 1 次免費）</button>
+    </div>
+    <div class="interpret-box" id="interpretBox"></div>
+  </div>
+
+  <div class="legend">
+    <span><span class="swatch" style="background:#b23b2e"></span>門迫</span>
+    <span><span class="swatch" style="background:#e0642a"></span>擊刑</span>
+    <span><span class="swatch" style="background:#6fadbe"></span>入墓</span>
+    <span><span class="swatch" style="border:1.5px solid #8a8577;background:transparent"></span>空無</span>
+  </div>
+
+  <footer>奇門遁甲六位數字預測法</footer>
+</div>
+
+<script>
+// ---------- 帳號登入（自建後端 + LINE OAuth，不經 Supabase Auth） ----------
+const loginBar = document.getElementById('loginBar');
+
+function renderLoggedOut(){
+  loginBar.innerHTML = `<button class="btn-line" id="lineLoginBtn">使用 LINE 登入</button>`;
+  document.getElementById('lineLoginBtn').addEventListener('click', () => {
+    window.location.href = '/api/line-login';
+  });
+}
+
+function renderLoggedIn(user){
+  loginBar.innerHTML = `
+    <div class="user-info">
+      ${user.pictureUrl ? `<img class="avatar" src="${user.pictureUrl}" alt="avatar">` : ''}
+      <span>${user.displayName || '已登入'}　·　${user.pointsBalance ?? 0} 點</span>
+    </div>
+    <button class="btn-topup" id="topupBtn">儲值</button>
+    <button class="btn-logout" id="logoutBtn">登出</button>
+  `;
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/';
+  });
+  document.getElementById('topupBtn').addEventListener('click', () => {
+    document.getElementById('topupPanel').classList.toggle('show');
+  });
+}
+
+async function refreshLoginState(){
+  try{
+    const resp = await fetch('/api/me');
+    const data = await resp.json();
+    if(data.loggedIn){
+      renderLoggedIn(data);
+    } else {
+      renderLoggedOut();
+    }
+  } catch(err){
+    renderLoggedOut();
+  }
+}
+
+refreshLoginState();
+
+// 如果登入流程失敗，網址上會帶 login_error 參數，顯示簡短提示
+(function showLoginErrorIfAny(){
+  const params = new URLSearchParams(window.location.search);
+  const err = params.get('login_error');
+  if(err){
+    const note = document.createElement('div');
+    note.style.cssText = 'text-align:center;font-size:11.5px;color:#b23b2e;margin-bottom:14px;';
+    note.textContent = 'LINE 登入失敗，請再試一次（錯誤代碼：' + err + '）';
+    loginBar.insertAdjacentElement('afterend', note);
+    // 清掉網址上的參數，避免重新整理又顯示
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+
+// ---------- 資料表 ----------
+const palaceByDigit = {1:'坎',2:'坤',3:'震',4:'巽',5:'坤',6:'乾',7:'兌',8:'艮',9:'離',0:'坤'};
+const shenByDigit   = {1:'值符',2:'螣蛇',3:'太陰',4:'六合',5:'白虎',6:'玄武',7:'九地',8:'九天',9:'值符'};
+const starByDigit   = {1:'天蓬',2:'天芮',3:'天沖',4:'天輔',5:'天芮',6:'天心',7:'天柱',8:'天任',9:'天英',0:'天芮'};
+const doorByDigit   = {1:'休',2:'死',3:'傷',4:'杜',5:'死',6:'開',7:'驚',8:'生',9:'景',0:'死'};
+const ganByDigit    = {2:'乙',3:'丙',4:'丁',5:'戊',6:'己',7:'庚',8:'辛',9:'壬'};
+
+
+const palaceMeta = {
+  坎:{halo:'#c7c9d1', gua:'☵'},
+  坤:{halo:'#c99a3f', gua:'☷'},
+  震:{halo:'#2f8f8a', gua:'☳'},
+  巽:{halo:'#3f9d5c', gua:'☴'},
+  乾:{halo:'#c7c9d1', gua:'☰'},
+  兌:{halo:'#c0392b', gua:'☱'},
+  艮:{halo:'#c7c9d1', gua:'☶'},
+  離:{halo:'#9b7bc7', gua:'☲'}
+};
+
+const harmRules = {
+  坎:{menpo:['生','死']},
+  艮:{menpo:['傷','杜'], jixing:['庚'], rumu:['丁','己']},
+  震:{menpo:['驚','開'], jixing:['戊']},
+  巽:{menpo:['驚','開'], jixing:['壬','癸'], rumu:['辛']},
+  離:{menpo:['休'], jixing:['辛']},
+  坤:{menpo:['傷','杜'], jixing:['己'], rumu:['癸']},
+  兌:{menpo:['景']},
+  乾:{menpo:['景']}
+};
+
+const dieLabels = ['宮位','八神','八星','八門','天干','地干'];
+const defaultChars = ['誠','心','問','卦','占','卜'];
+
+// ---------- 狀態 ----------
+let mode = 'roll'; // 'roll' | 'manual'
+let lastResult = null;
+
+// ---------- DOM ----------
+const diceRow = document.getElementById('diceRow');
+const actionBtn = document.getElementById('actionBtn');
+const rerollNote = document.getElementById('rerollNote');
+const modeRollBtn = document.getElementById('modeRollBtn');
+const modeManualBtn = document.getElementById('modeManualBtn');
+const resultArea = document.getElementById('resultArea');
+const palaceFrameOuter = document.getElementById('palaceFrameOuter');
+const palaceFrame = document.getElementById('palaceFrame');
+const palaceGrid = document.getElementById('palaceGrid');
+const palaceName = document.getElementById('palaceName');
+const palaceGuaTop = document.getElementById('palaceGuaTop');
+const harmTags = document.getElementById('harmTags');
+const panSummary = document.getElementById('panSummary');
+const interpretBtn = document.getElementById('interpretBtn');
+const interpretBox = document.getElementById('interpretBox');
+
+function renderDiceRow(){
+  diceRow.innerHTML = '';
+  for(let i=0;i<6;i++){
+    if(mode === 'roll'){
+      const d = document.createElement('div');
+      d.className = 'die default-char';
+      d.dataset.label = dieLabels[i];
+      d.textContent = defaultChars[i];
+      diceRow.appendChild(d);
+    } else {
+      const inp = document.createElement('input');
+      inp.className = 'die-input';
+      inp.type = 'number';
+      inp.min = '0'; inp.max = '9';
+      inp.maxLength = 1;
+      inp.dataset.label = dieLabels[i];
+      inp.addEventListener('input', () => {
+        if(inp.value.length > 1) inp.value = inp.value.slice(0,1);
+        if(inp.value !== '' && (Number(inp.value) < 0 || Number(inp.value) > 9)) inp.value = '';
+      });
+      diceRow.appendChild(inp);
+    }
+  }
+}
+
+function setMode(newMode){
+  mode = newMode;
+  modeRollBtn.classList.toggle('active', mode === 'roll');
+  modeManualBtn.classList.toggle('active', mode === 'manual');
+  actionBtn.textContent = mode === 'roll' ? '擲　骰' : '起　盤';
+  rerollNote.textContent = '';
+  renderDiceRow();
+}
+modeRollBtn.addEventListener('click', () => setMode('roll'));
+modeManualBtn.addEventListener('click', () => setMode('manual'));
+
+function rand10(){ return Math.floor(Math.random()*10); }
+
+function rollSixDigits(){
+  let d1,d2,d3,d4,d5,d6;
+  d1 = rand10(); d3 = rand10(); d4 = rand10();
+  do{ d2 = rand10(); } while(d1===0 && d2===0);
+  d5 = rand10(); d6 = rand10();
+  let rerolled56 = false;
+  while(d5===0 && d6===0){ rerolled56 = true; d6 = rand10(); }
+  return {digits:[d1,d2,d3,d4,d5,d6], rerolled56};
+}
+
+function resolveGan(digit){
+  if(digit===0){ return {value:'空無', empty:true}; }
+  if(digit===1){ return {value: Math.random()<0.5 ? '戊' : '癸'}; }
+  return {value: ganByDigit[digit]};
+}
+
+function computeResult(digits){
+  const [d1,d2,d3,d4,d5,d6] = digits;
+  const palace = palaceByDigit[d1];
+  const shen = d2 !== 0 ? shenByDigit[d2] : shenByDigit[d1];
+  const star = starByDigit[d3];
+  const door = doorByDigit[d4];
+  const tianGan = resolveGan(d5);
+  const diGan = resolveGan(d6);
+
+  const rule = harmRules[palace] || {};
+  const doorHarm = (rule.menpo || []).includes(door);
+  const tianJixing = (rule.jixing || []).includes(tianGan.value);
+  const diJixing = (rule.jixing || []).includes(diGan.value);
+  const tianRumu = (rule.rumu || []).includes(tianGan.value);
+  const diRumu = (rule.rumu || []).includes(diGan.value);
+
+  return { palace, shen, star, door, tianGan, diGan, doorHarm, tianJixing, diJixing, tianRumu, diRumu, digits };
+}
+
+function cellHtml(text, opts={}){
+  const cls = ['cell'];
+  if(opts.red) cls.push('red');
+  if(opts.orange) cls.push('orange');
+  if(opts.cyan) cls.push('cyan');
+  if(opts.shen) cls.push('shen');
+  if(opts.empty){
+    return `<div class="${cls.join(' ')}"><span class="val"><span class="empty-circle"></span></span></div>`;
+  }
+  return `<div class="${cls.join(' ')}"><span class="val">${text}</span></div>`;
+}
+
+function renderResult(result){
+  const meta = palaceMeta[result.palace];
+  const halo = meta.halo;
+
+  palaceFrameOuter.style.setProperty('--halo-color', halo);
+  palaceFrame.style.setProperty('--halo-color', halo);
+  palaceFrame.style.borderColor = halo;
+  palaceFrame.style.boxShadow = `inset 0 0 30px ${halo}`;
+  palaceFrameOuter.style.boxShadow = `0 0 36px 6px ${halo}`;
+  palaceGuaTop.style.color = halo;
+  palaceGuaTop.style.textShadow = `0 0 18px ${halo}`;
+  palaceName.style.color = halo;
+  palaceName.style.textShadow = `0 0 14px ${halo}`;
+
+  palaceGrid.innerHTML = `
+    ${cellHtml(result.shen, {shen:true})}
+    ${cellHtml(result.tianGan.value, {empty: result.tianGan.empty, orange: result.tianJixing, cyan: result.tianRumu})}
+    ${cellHtml(result.star, {})}
+    ${cellHtml(result.diGan.value, {empty: result.diGan.empty, orange: result.diJixing, cyan: result.diRumu})}
+    ${cellHtml(result.door + '門', {red: result.doorHarm})}
+  `;
+
+  palaceGuaTop.textContent = meta.gua;
+  palaceName.textContent = result.palace.split('').join(' ') + ' 宮';
+
+  const tags = [];
+  if(result.doorHarm) tags.push(`<span class="tag red">門迫：${result.door}門</span>`);
+  if(result.tianJixing) tags.push(`<span class="tag orange">天干擊刑：${result.tianGan.value}</span>`);
+  if(result.diJixing) tags.push(`<span class="tag orange">地干擊刑：${result.diGan.value}</span>`);
+  if(result.tianRumu) tags.push(`<span class="tag cyan">天干入墓：${result.tianGan.value}</span>`);
+  if(result.diRumu) tags.push(`<span class="tag cyan">地干入墓：${result.diGan.value}</span>`);
+  if(result.tianGan.empty) tags.push(`<span class="tag">天干空無</span>`);
+  if(result.diGan.empty) tags.push(`<span class="tag">地干空無</span>`);
+  harmTags.innerHTML = tags.join('');
+
+  const harmPlain = [];
+  if(result.doorHarm) harmPlain.push(`${result.door}門迫`);
+  if(result.tianJixing) harmPlain.push(`天干${result.tianGan.value}擊刑`);
+  if(result.diJixing) harmPlain.push(`地干${result.diGan.value}擊刑`);
+  if(result.tianRumu) harmPlain.push(`天干${result.tianGan.value}入墓`);
+  if(result.diRumu) harmPlain.push(`地干${result.diGan.value}入墓`);
+  if(result.tianGan.empty) harmPlain.push('天干空無');
+  if(result.diGan.empty) harmPlain.push('地干空無');
+
+  panSummary.innerHTML = `
+    <span class="label">盤　象</span>
+    <span class="line">${result.palace}宮・${result.shen}・${result.star}・${result.door}門</span>
+    <span class="line">天干 ${result.tianGan.value}　地干 ${result.diGan.value}</span>
+    <span class="line" style="color:var(--ink-faint); font-size:12px;">${harmPlain.length ? harmPlain.join('　') : '盤象平順，無四害'}</span>
+  `;
+
+  resultArea.classList.add('show');
+  interpretBox.classList.remove('show');
+  interpretBox.textContent = '';
+}
+
+async function playRoll(){
+  actionBtn.disabled = true;
+  rerollNote.textContent = '';
+  const dieEls = diceRow.querySelectorAll('.die');
+  dieEls.forEach(el => el.classList.add('rolling'));
+  dieEls.forEach(el => el.classList.remove('default-char'));
+
+  const spinTicks = 14;
+  for(let t=0;t<spinTicks;t++){
+    dieEls.forEach(el => { el.textContent = rand10(); });
+    await new Promise(r => setTimeout(r, 55));
+  }
+
+  const {digits, rerolled56} = rollSixDigits();
+  dieEls.forEach((el,i) => { el.textContent = digits[i]; el.classList.remove('rolling'); });
+
+  if(rerolled56){
+    rerollNote.textContent = '（第5、6碼同時為空無，已自動重骰其中一碼）';
+  }
+
+  const result = computeResult(digits);
+  lastResult = result;
+  renderResult(result);
+  actionBtn.disabled = false;
+}
+
+function playManual(){
+  const inputs = diceRow.querySelectorAll('.die-input');
+  const digits = [];
+  for(const inp of inputs){
+    if(inp.value === '' || isNaN(Number(inp.value))){
+      rerollNote.textContent = '請將六個位置都輸入 0～9 的數字';
+      return;
+    }
+    digits.push(Number(inp.value));
+  }
+  const [d1,d2,,,d5,d6] = digits;
+  if(d1===0 && d2===0){
+    rerollNote.textContent = '第1、2碼不可同時為 0（無法判讀），請修改其中一碼';
+    return;
+  }
+  if(d5===0 && d6===0){
+    rerollNote.textContent = '第5、6碼不可同時為 0（空無），請修改其中一碼';
+    return;
+  }
+  rerollNote.textContent = '';
+  const result = computeResult(digits);
+  lastResult = result;
+  renderResult(result);
+}
+
+actionBtn.addEventListener('click', () => {
+  if(mode === 'roll') playRoll();
+  else playManual();
+});
+
+renderDiceRow();
+
+// ---------- AI 解盤（呼叫後端 /api/interpret） ----------
+interpretBtn.addEventListener('click', async () => {
+  if(!lastResult) return;
+  const q = document.getElementById('questionInput').value.trim();
+  const r = lastResult;
+
+  const panPayload = {
+    palace: r.palace,
+    shen: r.shen,
+    star: r.star,
+    door: r.door,
+    tianGan: r.tianGan.value,
+    diGan: r.diGan.value,
+    doorHarm: r.doorHarm,
+    tianJixing: r.tianJixing,
+    diJixing: r.diJixing,
+    tianRumu: r.tianRumu,
+    diRumu: r.diRumu,
+    tianEmpty: r.tianGan.empty || false,
+    diEmpty: r.diGan.empty || false
+  };
+
+  interpretBox.classList.add('show');
+  interpretBox.textContent = '解盤中，請稍候……';
+  interpretBtn.disabled = true;
+
+  try{
+    const resp = await fetch('/api/interpret', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, pan: panPayload })
+    });
+    const data = await resp.json();
+
+    if(!resp.ok){
+      if(data.code === 'not_logged_in'){
+        interpretBox.textContent = '請先使用 LINE 登入，才能使用 AI 解盤。';
+      } else if(data.code === 'insufficient_points'){
+        interpretBox.textContent = '點數不足（目前 ' + (data.pointsBalance ?? 0) + ' 點），本次免費次數也已用過，請儲值後再使用。';
+      } else {
+        interpretBox.textContent = '解盤失敗：' + (data.error || '請稍後再試');
+      }
+    } else {
+      const note = data.usedFree ? '（本次為免費使用）' : '（本次已扣 10 點）';
+      interpretBox.textContent = data.interpretation + '\n\n' + note;
+      refreshLoginState(); // 更新畫面上顯示的點數餘額
+    }
+  } catch(err){
+    interpretBox.textContent = '連線發生問題，請確認網路後再試一次。';
+  } finally {
+    interpretBtn.disabled = false;
+  }
+
+});
+</script>
+</body>
+</html>
