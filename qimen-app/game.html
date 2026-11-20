@@ -924,8 +924,7 @@ function buildChart(){
   $('panSummary').innerHTML = `
     <span class="label">盤　象</span>
     <span class="line">${r.palace}宮・${r.shen}・${r.star}・${r.door}門</span>
-    <span class="line">天干 ${r.tian.value}　地干 ${r.di.value}</span>
-    <span class="line" style="color:var(--ink-faint); font-size:12px;">${harmPlain}</span>`;
+    <span class="line">天干 ${r.tian.value}　地干 ${r.di.value}</span>`;
 
   // 引導、覺察、神諭
   const g = GAME_GUIDE.find(x => x.no === codes.guide);
@@ -938,7 +937,6 @@ function buildChart(){
   };
   $('extraCards').innerHTML = `
     <div class="line">引導：${g.no}　${escapeHtml(g.name)}</div>
-    <div>${escapeHtml(g.desc)}</div>
     <div class="line" style="margin-top:8px">覺察：${a.no}　${escapeHtml(a.topic)}</div>
     ${oTitle ? `<div class="line" style="margin-top:8px">神諭：${codes.oracle}　${escapeHtml(oTitle)}</div>` : ''}`;
 
