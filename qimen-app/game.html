@@ -608,7 +608,7 @@
     <input id="questionInput" type="text" placeholder="想問什麼事？（例：這件事適合現在進行嗎）" />
   </div>
 
-  <div class="hint">每一類可輸入牌上的編號，或直接從選單挑選牌名（中宮、天禽不計）</div>
+  <div class="hint">每一類可輸入牌上的編號，或直接從選單挑選牌名</div>
 
   <div class="card-form" id="cardForm"></div>
 
@@ -773,15 +773,15 @@ for(let n=1;n<=9;n++) stemOpts.push({ code:10+n, label:`${10+n}　${GAN[n]}・�
 const doorOpts = opts(DOOR, (n,v)=>`${n}　${v}門`).concat(Object.keys(DOOR).map(Number).map(n => ({ code:30+n, label:`${30+n}　${DOOR[n]}門・門迫` })));
 
 const CATS = [
-  { key:'palace', name:'宮卡', sub:'', opts: opts(PALACE,(n,v)=>`${n}　${v}宮`) },
-  { key:'door',   name:'門卡', sub:'1–9／門迫 31–39', opts: doorOpts },
-  { key:'star',   name:'星卡', sub:'', opts: opts(STAR,(n,v)=>`${n}　${v}星`) },
-  { key:'shen',   name:'神卡', sub:'', opts: opts(SHEN,(n,v)=>`${n}　${v}`) },
-  { key:'tian',   name:'天盤干', sub:'0–9／入墓 11–19／擊刑 21–29', opts: stemOpts },
-  { key:'di',     name:'地盤干', sub:'0–9／入墓 11–19／擊刑 21–29', opts: stemOpts },
-  { key:'guide',  name:'引導卡', sub:'1–64', opts: GAME_GUIDE.map(g => ({ code:g.no, label:`${g.no}　${g.name}` })) },
-  { key:'aware',  name:'覺察卡', sub:'1–16', opts: GAME_AWARE.map(a => ({ code:a.no, label:`${a.no}　${a.topic}` })) },
-  { key:'oracle', name:'神諭卡', sub:'選填 1–36', optional:true, opts: GAME_ORACLE.map((t,i) => ({ code:i+1, label:`${i+1}　${t}` })) }
+    { key:'palace', name:'宮位', sub:'', opts: opts(PALACE,(n,v)=>`${n}　${v}宮`) },
+  { key:'door',   name:'八門', sub:'', opts: doorOpts },
+  { key:'star',   name:'九星', sub:'', opts: opts(STAR,(n,v)=>`${n}　${v}星`) },
+  { key:'shen',   name:'八神', sub:'', opts: opts(SHEN,(n,v)=>`${n}　${v}`) },
+  { key:'tian',   name:'天盤', sub:'', opts: stemOpts },
+  { key:'di',     name:'地盤', sub:'', opts: stemOpts },
+  { key:'guide',  name:'引導', sub:'', opts: GAME_GUIDE.map(g => ({ code:g.no, label:`${g.no}　${g.name}` })) },
+  { key:'aware',  name:'覺察', sub:'', opts: GAME_AWARE.map(a => ({ code:a.no, label:`${a.no}　${a.topic}` })) },
+  { key:'oracle', name:'神諭', sub:'', optional:true, opts: GAME_ORACLE.map((t,i) => ({ code:i+1, label:`${i+1}　${t}` })) }
 ];
 
 const cardForm = document.getElementById('cardForm');
@@ -794,7 +794,7 @@ function buildForm(){
     row.innerHTML = `
       <div class="lab">${c.name}${c.sub ? `<small>${c.sub}</small>` : ''}</div>
       <input id="num_${c.key}" type="number" inputmode="numeric" placeholder="編號">
-      <select id="sel_${c.key}"><option value="">${c.optional ? '（沒有／未使用）' : '請選擇'}</option>
+      <select id="sel_${c.key}"><option value="">請選擇</option>
         ${c.opts.map(o => `<option value="${o.code}">${o.label}</option>`).join('')}</select>`;
     cardForm.appendChild(row);
     row.querySelector('input').addEventListener('input', () => syncFromNum(c.key));
